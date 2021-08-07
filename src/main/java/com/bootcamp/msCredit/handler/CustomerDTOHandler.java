@@ -41,9 +41,9 @@ public class CustomerDTOHandler {
 
     public Mono<ServerResponse> newCustomerDTO(ServerRequest request){
 
-        Mono<CustomerDTO> consumptionMono = request.bodyToMono(CustomerDTO.class);
+        Mono<CustomerDTO> customerDTOMono = request.bodyToMono(CustomerDTO.class);
 
-        return consumptionMono.flatMap( c -> service.create(c)).flatMap( c -> ServerResponse
+        return customerDTOMono.flatMap( c -> service.create(c)).flatMap( c -> ServerResponse
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(c)));

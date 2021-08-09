@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
 @Slf4j(topic = "credit_handler")
 @Component
 public class CreditHandler {
@@ -43,30 +45,6 @@ public class CreditHandler {
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
-        public Mono<ServerResponse> findCustomer(ServerRequest request) {
-            String customerIdentityNumber = request.pathVariable("customerIdentityNumber");
-            LOGGER.info("Entra handler y manda "+customerIdentityNumber);
-            return service.getCustomer(customerIdentityNumber).flatMap(c -> ServerResponse
-                    .ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(c))
-                    .switchIfEmpty(ServerResponse.notFound().build());
-        }
-//    public Mono<ServerResponse> newCredit(ServerRequest request){
-//
-//        Mono<Credit> creditMono = request.bodyToMono(Credit.class);
-//
-//        return creditMono.flatMap( credito -> {
-//            if(credito.getCreateAt() == null){
-//                credito.setCreateAt(new Date());
-//            }
-//
-//            return service.create(credito);
-//        }).flatMap( c -> ServerResponse
-//                .ok()
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(BodyInserters.fromValue(c)));
-//    }
 
     public Mono<ServerResponse> newCredit(ServerRequest request){
 
@@ -74,10 +52,6 @@ public class CreditHandler {
 
         return creditMono.flatMap( credito -> service.getCustomer(credito.getCustomerIdentityNumber())
        .flatMap(customerDTO -> {
-            if(credito.getCreateAt() == null){
-                credito.setCreateAt(new Date());
-                }
-
             credito.setCustomer(customerDTO);
 
             return service.create(credito);
@@ -85,7 +59,14 @@ public class CreditHandler {
                 .flatMap( c -> ServerResponse
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(c)));
+                .body(BodyInserters.fromValue(c)))
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> findAllByCustomerIdentityNumber(ServerRequest request){
+        String customerIdentityNumber = request.pathVariable("customerIdentityNumber");
+        return  ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
+                .body(service.findAllByCustomerIdentityNumber(customerIdentityNumber), Credit.class);
     }
 
     public Mono<ServerResponse> deleteCredit(ServerRequest request){
@@ -105,16 +86,12 @@ public class CreditHandler {
         String id = request.pathVariable("id");
 
         return service.findById(id).zipWith(creditMono, (db,req) -> {
-                    db.setCapital(req.getCapital());
-                    db.setCreditLifeIns(req.getCreditLifeIns());
-                    db.setCommission(req.getCommission());
-                    db.setInterestRate(req.getInterestRate());
-                    db.setNumOfInstallments(req.getNumOfInstallments());
+                    db.setAmount(req.getAmount());
                     return db;
                 }).flatMap( c -> ServerResponse
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(service.create(c),Credit.class))
+                        .body(service.update(c),Credit.class))
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 }

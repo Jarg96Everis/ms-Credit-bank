@@ -11,16 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
 @Service
 public class CreditServiceImpl implements ICreditService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CreditHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreditServiceImpl.class);
 
     @Autowired
     private CreditRepository repository;
@@ -44,19 +47,8 @@ public class CreditServiceImpl implements ICreditService {
     }
 
     @Override
-    public Mono<Credit> update(String id, Credit credit) {
-        return repository.findById(id).flatMap( c -> {
-            if (c == null){
-                return null;
-            }
-            c.setCapital(credit.getCapital());
-            c.setCreditLifeIns(credit.getCreditLifeIns());
-            c.setCommission(credit.getCommission());
-            c.setInterestRate(credit.getInterestRate());
-            c.setNumOfInstallments(credit.getNumOfInstallments());
-
-            return Mono.just(c);
-        });
+    public Mono<Credit> update( Credit credit) {
+        return repository.save(credit);
     }
 
     @Override
@@ -75,5 +67,10 @@ public class CreditServiceImpl implements ICreditService {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchangeToMono(clientResponse -> clientResponse.bodyToMono(CustomerDTO.class))
                 .doOnNext(c -> LOGGER.info("Customer Response: Customer={}", c.getName()));
+    }
+
+    @Override
+    public Flux<Credit> findAllByCustomerIdentityNumber(String customerIdentityNumber) {
+        return repository.findAllByCustomerIdentityNumber(customerIdentityNumber);
     }
 }

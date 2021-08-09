@@ -1,6 +1,7 @@
 package com.bootcamp.msCredit.handler;
 
-import com.bootcamp.msCredit.entities.Credit;
+import com.bootcamp.msCredit.models.dto.CustomerDTO;
+import com.bootcamp.msCredit.models.entities.Credit;
 import com.bootcamp.msCredit.services.ICreditService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -9,11 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j(topic = "credit_handler")
 @Component
@@ -31,24 +35,54 @@ public class CreditHandler {
 
     public Mono<ServerResponse> findCredit(ServerRequest request) {
         String id = request.pathVariable("id");
-        return service.findById(id).flatMap((c -> ServerResponse
+
+        return service.findById(id).flatMap(c -> ServerResponse
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(c))
-                .switchIfEmpty(ServerResponse.notFound().build()))
-        );
+                .body(BodyInserters.fromValue(c)))
+                .switchIfEmpty(ServerResponse.notFound().build());
     }
+
+        public Mono<ServerResponse> findCustomer(ServerRequest request) {
+            String customerIdentityNumber = request.pathVariable("customerIdentityNumber");
+            LOGGER.info("Entra handler y manda "+customerIdentityNumber);
+            return service.getCustomer(customerIdentityNumber).flatMap(c -> ServerResponse
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(c))
+                    .switchIfEmpty(ServerResponse.notFound().build());
+        }
+//    public Mono<ServerResponse> newCredit(ServerRequest request){
+//
+//        Mono<Credit> creditMono = request.bodyToMono(Credit.class);
+//
+//        return creditMono.flatMap( credito -> {
+//            if(credito.getCreateAt() == null){
+//                credito.setCreateAt(new Date());
+//            }
+//
+//            return service.create(credito);
+//        }).flatMap( c -> ServerResponse
+//                .ok()
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(BodyInserters.fromValue(c)));
+//    }
 
     public Mono<ServerResponse> newCredit(ServerRequest request){
 
-        Mono<Credit> consumptionMono = request.bodyToMono(Credit.class);
+        Mono<Credit> creditMono = request.bodyToMono(Credit.class);
 
-        return consumptionMono.flatMap( c -> {
-            if(c.getCreateAt() == null){
-                c.setCreateAt(new Date());
-            }
-            return service.create(c);
-        }).flatMap( c -> ServerResponse
+        return creditMono.flatMap( credito -> service.getCustomer(credito.getCustomerIdentityNumber())
+       .flatMap(customerDTO -> {
+            if(credito.getCreateAt() == null){
+                credito.setCreateAt(new Date());
+                }
+
+            credito.setCustomer(customerDTO);
+
+            return service.create(credito);
+                }))
+                .flatMap( c -> ServerResponse
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(c)));
@@ -58,19 +92,19 @@ public class CreditHandler {
 
         String id = request.pathVariable("id");
 
-        Mono<Credit> consumptionMono = service.findById(id);
+        Mono<Credit> creditMono = service.findById(id);
 
-        return consumptionMono
+        return creditMono
                 .doOnNext(c -> LOGGER.info("deleteConsumption: consumptionId={}", c.getId()))
                 .flatMap(c -> service.delete(c).then(ServerResponse.noContent().build()))
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
     public Mono<ServerResponse> updateCredit(ServerRequest request){
-        Mono<Credit> consumptionMono = request.bodyToMono(Credit.class);
+        Mono<Credit> creditMono = request.bodyToMono(Credit.class);
         String id = request.pathVariable("id");
 
-        return service.findById(id).zipWith(consumptionMono, (db,req) -> {
+        return service.findById(id).zipWith(creditMono, (db,req) -> {
                     db.setCapital(req.getCapital());
                     db.setCreditLifeIns(req.getCreditLifeIns());
                     db.setCommission(req.getCommission());

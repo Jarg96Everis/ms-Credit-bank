@@ -1,6 +1,6 @@
 package com.bootcamp.msCredit.services.impl;
 
-import com.bootcamp.msCredit.entities.CreditCustomer;
+import com.bootcamp.msCredit.models.entities.CreditCustomer;
 import com.bootcamp.msCredit.repositories.CreditCustomerRepository;
 import com.bootcamp.msCredit.services.ICreditCustomerService;
 import org.springframework.beans.factory.annotation.Autowired;

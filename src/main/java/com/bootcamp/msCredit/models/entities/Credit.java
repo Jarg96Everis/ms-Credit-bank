@@ -2,6 +2,7 @@ package com.bootcamp.msCredit.models.entities;
 
 import com.bootcamp.msCredit.models.dto.CustomerDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,6 +18,7 @@ import java.util.Date;
 @Getter
 @Setter
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
 @Builder
 public class Credit {

@@ -1,6 +1,5 @@
 package com.bootcamp.msCredit.handler;
 
-import com.bootcamp.msCredit.models.dto.CustomerDTO;
 import com.bootcamp.msCredit.models.entities.Credit;
 import com.bootcamp.msCredit.services.ICreditService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;

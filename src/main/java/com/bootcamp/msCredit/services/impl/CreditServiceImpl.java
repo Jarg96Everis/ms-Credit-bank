@@ -8,6 +8,7 @@ import com.bootcamp.msCredit.services.ICreditService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -28,8 +29,9 @@ public class CreditServiceImpl implements ICreditService {
     @Autowired
     private CreditRepository repository;
 
+    @Qualifier("client")
     @Autowired
-    private  WebClient client;
+    private WebClient.Builder client;
 
     @Override
     public Mono<Credit> create(Credit credit) {
@@ -62,7 +64,9 @@ public class CreditServiceImpl implements ICreditService {
         Map<String, Object> params = new HashMap<String,Object>();
         LOGGER.info("initializing client query");
         params.put("customerIdentityNumber",customerIdentityNumber);
-        return client.get()
+        return client.baseUrl("http://CUSTOMER-SERVICE/customer")
+                .build()
+                .get()
                 .uri("/findCustomerCredit/{customerIdentityNumber}",customerIdentityNumber)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchangeToMono(clientResponse -> clientResponse.bodyToMono(CustomerDTO.class))

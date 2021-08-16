@@ -12,8 +12,9 @@ public class WebClientConfig {
     @Value("${config.base.endpoint.customer}")
     private String url;
 
-    @Bean
-    public WebClient registerWebClient() {
-        return WebClient.create(url);
+    @Bean(name = "client")
+    @LoadBalanced
+    public WebClient.Builder registrarWebClient() {
+        return WebClient.builder();
     }
 }

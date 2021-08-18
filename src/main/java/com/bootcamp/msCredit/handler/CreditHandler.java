@@ -13,12 +13,9 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-
+/**
+ * The type Credit handler.
+ */
 @Slf4j(topic = "credit_handler")
 @Component
 public class CreditHandler {
@@ -28,11 +25,23 @@ public class CreditHandler {
     @Autowired
     private ICreditService service;
 
+    /**
+     * Find all mono.
+     *
+     * @param request the request
+     * @return the mono
+     */
     public Mono<ServerResponse> findAll(ServerRequest request){
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
                 .body(service.findAll(), Credit.class);
     }
 
+    /**
+     * Find credit mono.
+     *
+     * @param request the request
+     * @return the mono
+     */
     public Mono<ServerResponse> findCredit(ServerRequest request) {
         String id = request.pathVariable("id");
 
@@ -44,6 +53,12 @@ public class CreditHandler {
     }
 
 
+    /**
+     * New credit mono.
+     *
+     * @param request the request
+     * @return the mono
+     */
     public Mono<ServerResponse> newCredit(ServerRequest request){
 
         Mono<Credit> creditMono = request.bodyToMono(Credit.class);
@@ -61,12 +76,24 @@ public class CreditHandler {
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
+    /**
+     * Find all by customer identity number mono.
+     *
+     * @param request the request
+     * @return the mono
+     */
     public Mono<ServerResponse> findAllByCustomerIdentityNumber(ServerRequest request){
         String customerIdentityNumber = request.pathVariable("customerIdentityNumber");
         return  ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
                 .body(service.findAllByCustomerIdentityNumber(customerIdentityNumber), Credit.class);
     }
 
+    /**
+     * Delete credit mono.
+     *
+     * @param request the request
+     * @return the mono
+     */
     public Mono<ServerResponse> deleteCredit(ServerRequest request){
 
         String id = request.pathVariable("id");
@@ -79,6 +106,12 @@ public class CreditHandler {
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
+    /**
+     * Update credit mono.
+     *
+     * @param request the request
+     * @return the mono
+     */
     public Mono<ServerResponse> updateCredit(ServerRequest request){
         Mono<Credit> creditMono = request.bodyToMono(Credit.class);
         String id = request.pathVariable("id");

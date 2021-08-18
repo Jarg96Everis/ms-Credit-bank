@@ -14,6 +14,9 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+/**
+ * The type Credit.
+ */
 @Document(collection = "credit")
 @Getter
 @Setter

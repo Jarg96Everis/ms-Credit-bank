@@ -1,5 +1,6 @@
 package com.bootcamp.msCredit.handler;
 
+import com.bootcamp.msCredit.models.dto.CustomerDTO;
 import com.bootcamp.msCredit.models.entities.Credit;
 import com.bootcamp.msCredit.services.ICreditService;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class CreditHandler {
      * @param request the request
      * @return the mono
      */
-    public Mono<ServerResponse> findAll(ServerRequest request){
+    public Mono<ServerResponse> findAll(final ServerRequest request) {
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
                 .body(service.findAll(), Credit.class);
     }
@@ -42,7 +43,7 @@ public class CreditHandler {
      * @param request the request
      * @return the mono
      */
-    public Mono<ServerResponse> findCredit(ServerRequest request) {
+    public Mono<ServerResponse> findCredit(final ServerRequest request) {
         String id = request.pathVariable("id");
 
         return service.findById(id).flatMap(c -> ServerResponse
@@ -59,17 +60,18 @@ public class CreditHandler {
      * @param request the request
      * @return the mono
      */
-    public Mono<ServerResponse> newCredit(ServerRequest request){
-
+    public Mono<ServerResponse> newCredit(final ServerRequest request) {
         Mono<Credit> creditMono = request.bodyToMono(Credit.class);
 
-        return creditMono.flatMap( credito -> service.getCustomer(credito.getCustomerIdentityNumber())
-       .flatMap(customerDTO -> {
-            credito.setCustomer(customerDTO);
-
+        return creditMono.flatMap(credito -> service.getCustomer(credito.getCustomerIdentityNumber())
+       .flatMap(customer -> {
+           credito.setAmount(credito.getCapital() + (credito.getCapital() * credito.getInterestRate()) + credito.getCommission());
+           credito.setCustomer(CustomerDTO.builder().name(customer.getName())
+                   .code(customer.getCustomerType().getCode()).customerIdentityNumber(customer.getCustomerIdentityNumber()).build());
+            credito.setAmountInitial(credito.getAmount());
             return service.create(credito);
                 }))
-                .flatMap( c -> ServerResponse
+                .flatMap(c -> ServerResponse
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(c)))
@@ -82,7 +84,7 @@ public class CreditHandler {
      * @param request the request
      * @return the mono
      */
-    public Mono<ServerResponse> findAllByCustomerIdentityNumber(ServerRequest request){
+    public Mono<ServerResponse> findAllByCustomerIdentityNumber(final ServerRequest request) {
         String customerIdentityNumber = request.pathVariable("customerIdentityNumber");
         return  ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
                 .body(service.findAllByCustomerIdentityNumber(customerIdentityNumber), Credit.class);
@@ -94,7 +96,7 @@ public class CreditHandler {
      * @param request the request
      * @return the mono
      */
-    public Mono<ServerResponse> deleteCredit(ServerRequest request){
+    public Mono<ServerResponse> deleteCredit(final ServerRequest request) {
 
         String id = request.pathVariable("id");
 
@@ -112,17 +114,17 @@ public class CreditHandler {
      * @param request the request
      * @return the mono
      */
-    public Mono<ServerResponse> updateCredit(ServerRequest request){
+    public Mono<ServerResponse> updateCredit(final ServerRequest request) {
         Mono<Credit> creditMono = request.bodyToMono(Credit.class);
         String id = request.pathVariable("id");
 
         return service.findById(id).zipWith(creditMono, (db,req) -> {
                     db.setAmount(req.getAmount());
                     return db;
-                }).flatMap( c -> ServerResponse
+                }).flatMap(c -> ServerResponse
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(service.update(c),Credit.class))
+                        .body(service.update(c), Credit.class))
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 }

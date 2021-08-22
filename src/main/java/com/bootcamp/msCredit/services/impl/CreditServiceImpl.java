@@ -1,5 +1,6 @@
 package com.bootcamp.msCredit.services.impl;
 
+import com.bootcamp.msCredit.models.dto.Customer;
 import com.bootcamp.msCredit.models.dto.CustomerDTO;
 import com.bootcamp.msCredit.models.entities.Credit;
 import com.bootcamp.msCredit.repositories.CreditRepository;
@@ -94,7 +95,7 @@ public class CreditServiceImpl implements ICreditService {
      * @return
      */
     @Override
-    public Mono<CustomerDTO> getCustomer(final String customerIdentityNumber) {
+    public Mono<Customer> getCustomer(final String customerIdentityNumber) {
         Map<String, Object> params = new HashMap<>();
         LOGGER.info("initializing client query");
         params.put("customerIdentityNumber", customerIdentityNumber);
@@ -103,7 +104,7 @@ public class CreditServiceImpl implements ICreditService {
                 .get()
                 .uri("/findCustomerCredit/{customerIdentityNumber}", customerIdentityNumber)
                 .accept(MediaType.APPLICATION_JSON)
-                .exchangeToMono(clientResponse -> clientResponse.bodyToMono(CustomerDTO.class))
+                .exchangeToMono(clientResponse -> clientResponse.bodyToMono(Customer.class))
                 .doOnNext(c -> LOGGER.info("Customer Response: Customer={}", c.getName()));
     }
 

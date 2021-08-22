@@ -5,19 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 /**
- * The type Customer dto.
+ * The type Customer.
  */
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
 @Builder
-public class CustomerDTO {
-    /**
-     * @name is the field that represent the name of the customer.
-     */
+@AllArgsConstructor
+@NoArgsConstructor
+public class Customer {
+
     private String name;
-    private String code;
+    private String customerIdentityType;
     private String customerIdentityNumber;
+    private CustomerType customerType;
 }

@@ -22,15 +22,14 @@ public class RouterConfig {
      * @return the router function
      */
     @Bean
-    public RouterFunction<ServerResponse> routes(CreditHandler creditHandler){
+    public RouterFunction<ServerResponse> routes(final CreditHandler creditHandler) {
 
         return route(GET("/api/credit"), creditHandler::findAll)
-                .andRoute(GET("/api/creditsUser/{customerIdentityNumber}"),creditHandler::findAllByCustomerIdentityNumber)
+                .andRoute(GET("/api/credit/customer/{customerIdentityNumber}"), creditHandler::findAllByCustomerIdentityNumber)
                 .andRoute(GET("/api/credit/{id}"), creditHandler::findCredit)
                 .andRoute(POST("/api/credit"), creditHandler::newCredit)
                 .andRoute(PUT("/api/credit/{id}"), creditHandler::updateCredit)
                 .andRoute(DELETE("/api/credit/{id}"), creditHandler::deleteCredit);
-
     }
 
 }
